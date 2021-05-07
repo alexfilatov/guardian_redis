@@ -1,4 +1,4 @@
-defmodule Guardian.Redis.Repo do
+defmodule GuardianRedis.Repo do
   @moduledoc """
     `Guardian.Redis.Repo` is a repo module that operates Guardian.DB.Token in Redis.
     The repo module serves only GuardianDb purpose, do not use it as a Redis repo for your project.
@@ -8,9 +8,10 @@ defmodule Guardian.Redis.Repo do
     Module stores JWT token in Redis using automatic expiry feature of Redis so we don't need to run token sweeper.
     Anyway, `delete_all` still implemented to allow manual sweeping if needed.
   """
+  @behaviour Guardian.DB.Adapter
 
   alias Guardian.DB.Token
-  alias Guardian.Redis.Redix, as: Redis
+  alias GuardianRedis.Redix, as: Redis
 
   @spec one(queryable :: Ecto.Queryable.t(), opts :: Keyword.t()) ::
           Ecto.Schema.t() | nil
@@ -28,6 +29,10 @@ defmodule Guardian.Redis.Repo do
     end
   end
 
+  @doc """
+  Insert Token into Redis
+  Token is auto expired in `expired_in` seconds based on JWT `exp` value
+  """
   @spec insert(
           struct_or_changeset :: Ecto.Schema.t() | Ecto.Changeset.t(),
           opts :: Keyword.t()
@@ -55,6 +60,9 @@ defmodule Guardian.Redis.Repo do
     end
   end
 
+  @doc """
+  Remove all user tokens from Redis, useful for manual sweeping
+  """
   @spec delete_all(
           queryable :: Ecto.Queryable.t(),
           opts :: Keyword.t()
@@ -69,6 +77,9 @@ defmodule Guardian.Redis.Repo do
     {amount_deleted - 1, :ok}
   end
 
+  @doc """
+  Remove a user token, log out functionality, invalidation of a JWT token
+  """
   @spec delete(
           struct_or_changeset :: Ecto.Schema.t() | Ecto.Changeset.t(),
           opts :: Keyword.t()

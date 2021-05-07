@@ -1,10 +1,15 @@
-defmodule Guardian.Redis.Redix do
+defmodule GuardianRedis.Redix do
+  @moduledoc """
+    Redix module
+  """
   @default_redis_host "127.0.0.1"
   @default_redis_port 6379
   @default_redis_pool_size 1
 
+  @doc """
+  Specs for the Redix connections.
+  """
   def child_spec(_args) do
-    # Specs for the Redix connections.
     children =
       for index <- 0..(pool_size() - 1) do
         Supervisor.child_spec(
@@ -20,6 +25,12 @@ defmodule Guardian.Redis.Redix do
     }
   end
 
+  @doc """
+  Redis commands execution via pool of Redix workers
+  """
+  @spec command(command :: String.t()) ::
+          {:ok, Redix.Protocol.redis_value()}
+          | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def command(command) do
     Redix.command(:"redix_#{random_index()}", command)
   end
