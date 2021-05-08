@@ -29,7 +29,7 @@ config :guardian, Guardian.DB,
        repo: GuardianRedis.Repo # Add this Redis repository module
 ```
 
-## Implement a repo for a different storage
+## Implement Guardian.DB repo for a different storage
 
 Initially, Guardian.DB was aimed to store and operate JWT tokens in a PostgreSQL database. 
 Sometimes round trip to Postgres database is expensive so this is why this Redis repo was born.
@@ -53,7 +53,6 @@ defmodule Guardian.DB.Adapter do
   @typep id :: pos_integer() | binary() | Ecto.UUID.t()
 
   @callback one(queryable()) :: nil | schema()
-  @callback get(queryable(), id()) :: nil | schema()
   @callback insert(schema_or_changeset()) :: {:ok, schema()}
   @callback delete(schema_or_changeset()) :: {:ok, schema()}
   @callback delete_all(queryable()) :: {:ok, pos_integer()}
