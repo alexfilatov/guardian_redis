@@ -36,7 +36,8 @@ defmodule GuardianRedis.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:guardian_db, git: "https://github.com/alexfilatov/guardian_db", branch: "feature/storage_adapter"},
+      {:guardian_db,
+       git: "https://github.com/alexfilatov/guardian_db", branch: "feature/storage_adapter"},
       {:redix, "~> 1.0"},
       {:jason, "~> 1.1"},
 
@@ -46,7 +47,7 @@ defmodule GuardianRedis.MixProject do
       {:excoveralls, ">= 0.0.0", only: [:test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
       {:inch_ex, ">= 0.0.0", only: [:dev], runtime: false},
-      {:plug, "~> 1.10", only: [:dev, :test], runtime: false},
+      {:plug, "~> 1.10", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -73,7 +74,7 @@ defmodule GuardianRedis.MixProject do
         "CHANGELOG.md",
         "LICENSE",
         "mix.exs",
-        "README.md",
+        "README.md"
       ]
     ]
   end
