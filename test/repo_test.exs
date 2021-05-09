@@ -93,8 +93,8 @@ defmodule GuardianRedis.RepoTest do
   test "on_revoke with a record in the db", context do
     Token.create(context.claims, "The JWT")
 
-    assert GuardianRedis.Redix.command(["KEYS", "*"]) ==
-             {:ok, ["set:initial_the_subject", "token-uuid:token"]}
+    {:ok, keys} = GuardianRedis.Redix.command(["KEYS", "*"])
+    assert Enum.sort(keys) == ["set:initial_the_subject", "token-uuid:token"]
 
     token = get_token()
 
