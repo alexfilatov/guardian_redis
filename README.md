@@ -1,5 +1,8 @@
 # GuardianRedis
 
+[![Hex.pm](https://img.shields.io/hexpm/v/guardian_redis.svg)](https://hex.pm/packages/guardian_redis)
+![Build Status](https://github.com/alexfilatov/guardian_redis/workflows/Continuous%20Integration/badge.svg)
+
 Redis repository for Guardian DB. 
 
 ## Installation
