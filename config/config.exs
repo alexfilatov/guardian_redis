@@ -10,6 +10,6 @@ config :guardian, Guardian.DB,
 # token_types: ["refresh_token"],
 
 config :guardian_redis, :redis,
-  host: "127.0.0.1",
-  port: 6379,
-  pool_size: 10
+  host: System.get_env("REDIS_HOST", "127.0.0.1"),
+  port: System.get_env("REDIS_PORT", "6379"),
+  pool_size: System.get_env("REDIS_POOL_SIZE", "1")
