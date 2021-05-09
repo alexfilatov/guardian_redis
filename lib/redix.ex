@@ -53,7 +53,7 @@ defmodule GuardianRedis.Redix do
   end
 
   defp pool_size do
-    redis_config()[:pool_size] || @default_redis_pool_size
+    "#{redis_config()[:pool_size] || @default_redis_pool_size}" |> String.to_integer()
   end
 
   defp redis_config do
