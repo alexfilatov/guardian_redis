@@ -36,8 +36,7 @@ defmodule GuardianRedis.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:guardian_db,
-       git: "https://github.com/alexfilatov/guardian_db", branch: "feature/storage_adapter"},
+      {:guardian_db, "~> 2.0"},
       {:redix, "~> 1.0"},
       {:jason, "~> 1.1"},
 
