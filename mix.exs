@@ -7,7 +7,7 @@ defmodule GuardianRedis.MixProject do
   def project do
     [
       name: "GuardianRedis",
-      app: :guardian_db,
+      app: :guardian_redis,
       version: @version,
       description: "Redis repo for Guardian DB",
       elixir: "~> 1.4 or ~> 1.5",

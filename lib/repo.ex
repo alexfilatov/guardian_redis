@@ -1,6 +1,6 @@
 defmodule GuardianRedis.Repo do
   @moduledoc """
-    `Guardian.Redis.Repo` is a repo module that operates Guardian.DB.Token in Redis.
+    `GuardianRedis.Repo` is a repo module that operates Guardian.DB.Token in Redis.
     The repo module serves only GuardianDb purpose, do not use it as a Redis repo for your project.
     Dependant on :jason and :redix.
 
@@ -24,6 +24,7 @@ defmodule GuardianRedis.Repo do
     key = key(query)
 
     case Redis.command(["GET", key]) do
+      {:ok, nil} -> nil
       {:ok, jwt_json} -> Jason.decode!(jwt_json)
       _ -> nil
     end
