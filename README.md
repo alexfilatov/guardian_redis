@@ -21,13 +21,23 @@ end
 
 ## Configuration
 
-All you need to do is to use [configuration from Guardian.DB](https://github.com/ueberauth/guardian_db#readme) 
-and just use `GuardianRedis.Repo` as a `repo` in settings.  
+All you need to install Guardian DB as per [Guardian.DB README](https://github.com/ueberauth/guardian_db#readme) 
+and just use `GuardianRedis.Repo` as a `repo` in settings.
 
 ```elixir
 config :guardian, Guardian.DB,
        repo: GuardianRedis.Repo # Add this Redis repository module
 ```
+
+Apart from this please set up Redis configuration:
+
+```elixir
+config :guardian_redis, :redis,
+  host: "127.0.0.1",
+  port: 6379,
+  pool_size: 10
+```
+
 
 ## Implement Guardian.DB repo for a different storage
 

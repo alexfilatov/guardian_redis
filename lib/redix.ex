@@ -3,7 +3,7 @@ defmodule GuardianRedis.Redix do
     Redix module
   """
   @default_redis_host "127.0.0.1"
-  @default_redis_port "6379"
+  @default_redis_port 6379
   @default_redis_pool_size 1
 
   @doc """
@@ -48,7 +48,8 @@ defmodule GuardianRedis.Redix do
   end
 
   defp redis_port do
-    (redis_config()[:port] || "#{@default_redis_port}") |> String.to_integer()
+    # casting integer port value to String in case port value comes from ENV
+    ("#{redis_config()[:port]}" || "#{@default_redis_port}") |> String.to_integer()
   end
 
   defp pool_size do

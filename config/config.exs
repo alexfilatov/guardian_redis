@@ -10,5 +10,5 @@ config :guardian, Guardian.DB,
 
 config :guardian_redis, :redis,
   host: "127.0.0.1",
-  port: "6379",
+  port: 6379,
   pool_size: 10
