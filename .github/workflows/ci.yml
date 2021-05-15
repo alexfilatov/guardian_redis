@@ -53,11 +53,3 @@ jobs:
 
       - name: Run Credo
         run: mix credo
-
-      - name: Run Coveralls
-        run: mix coveralls.github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REDIS_HOST: redis
-          REDIS_PORT: 6379
-          REDIS_POOL_SIZE: 1
