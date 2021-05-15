@@ -37,7 +37,7 @@ defmodule GuardianRedis.MixProject do
   defp deps do
     [
       {:guardian_db, "~> 2.0"},
-      {:redix, "~> 1.0"},
+      {:redix, "~> 1.1"},
       {:jason, "~> 1.1"},
 
       # Tools

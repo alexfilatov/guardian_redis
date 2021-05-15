@@ -1,99 +1,61 @@
 ---
-
-name: Continuous Integration
+name: build
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
   push:
     branches:
       - master
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  Test:
+  test:
     runs-on: ubuntu-latest
-
-    container:
-      image: elixir:1.11-alpine
-
+    env:
+      MIX_ENV: test
+    strategy:
+      matrix:
+        elixir: ['1.10', '1.11']
+        otp: ['22', '23']
     services:
       redis:
         image: redis
-        ports: ["6379:6379"]
+        ports: [ "6379:6379" ]
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Setup elixir
+        uses: actions/setup-elixir@v1
         with:
-          persist-credentials: false
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
 
-      - name: Install (os)
-        run: apk add --no-cache gcc g++ git make musl-dev tar zstd
-
-      - name: Install (mix)
-        run: |
-          mix local.rebar --force
-          mix local.hex --force
-
-      - name: Install (deps)
-        run: mix deps.get
-
-      - name: Run Tests
-        run: mix test
-        env:
-          REDIS_HOST: redis
-          REDIS_PORT: 6379
-          REDIS_POOL_SIZE: 1
-
-  Format:
-    runs-on: ubuntu-latest
-
-    container:
-      image: elixir:1.11-alpine
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Get deps cache
+        uses: actions/cache@v2
         with:
-          persist-credentials: false
+          path: deps/
+          key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
 
-      - name: Install (os)
-        run: apk add --no-cache gcc g++ git make musl-dev tar zstd
+      - name: Get build cache
+        uses: actions/cache@v2
+        with:
+          path: _build/test/
+          key: build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
 
-      - name: Install (mix)
+      - name: Install Dependencies
         run: |
           mix local.rebar --force
           mix local.hex --force
           mix deps.get
-
-      - name: Run Formatter
-        run: mix format --check-formatted
-
-  Credo:
-    runs-on: ubuntu-latest
-
-    container:
-      image: elixir:1.11-alpine
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-
-      - name: Install (os)
-        run: apk add --no-cache gcc g++ git make musl-dev tar zstd
-
-      - name: Install (mix)
-        run: |
-          mix local.rebar --force
-          mix local.hex --force
-
-      - name: Install (deps)
-        run: mix deps.get
-
+          mix compile
+      - name: Run Tests
+        run: mix coveralls.github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          REDIS_POOL_SIZE: 1
       - name: Run Credo
         run: mix credo
