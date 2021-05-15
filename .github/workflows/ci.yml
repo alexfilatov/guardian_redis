@@ -54,7 +54,7 @@ jobs:
       - name: Run Credo
         run: mix credo
 
-      - name: Run Tests
+      - name: Run Coveralls
         run: mix coveralls.github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
