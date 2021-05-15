@@ -23,8 +23,13 @@ jobs:
         ports: [ "6379:6379" ]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Install (os)
+        run: apk add --no-cache gcc g++ git make musl-dev tar zstd
 
       - name: Setup elixir
         uses: actions/setup-elixir@v1
