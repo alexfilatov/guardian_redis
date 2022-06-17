@@ -32,6 +32,24 @@ config :guardian, Guardian.DB,
        repo: GuardianRedis.Repo # Add this Redis repository module
 ```
 
+Add GuardianRedis.Redix to your supervision tree:
+
+(Note: If this is not configured you will get a `no process` error when storing or revoking tokens!)
+
+```elixir
+defmodule MyApp.Application do
+
+  # ...
+
+  defp my_app_otp_apps() do
+    children = [
+      MyApp.Repo,
+      GuardianRedis.Redix
+    ]
+  end
+end
+```
+
 Apart from this please set up Redis configuration:
 
 ```elixir
