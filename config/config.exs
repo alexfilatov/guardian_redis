@@ -1,11 +1,6 @@
 use Mix.Config
 
-config :guardian, Guardian.DB,
-  # Add your repository module
-  repo: GuardianRedis.Repo,
-  # default: 60 minutes
-  sweep_interval: 60
-
+config :guardian, Guardian.DB, repo: GuardianRedis.Repo
 # store all token types if not set
 # token_types: ["refresh_token"],
 
