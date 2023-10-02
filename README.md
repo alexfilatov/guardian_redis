@@ -3,12 +3,12 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/guardian_redis.svg)](https://hex.pm/packages/guardian_redis)
 ![Build Status](https://github.com/alexfilatov/guardian_redis/workflows/Continuous%20Integration/badge.svg)
 
-Redis repository for Guardian DB. 
+Redis adapter for Guardian DB.
 
 ## Installation
 
-You can use `GuardianRedis` in case you use [Guardian](https://github.com/ueberauth/guardian) library for authentication 
-and [Guardian.DB](https://github.com/ueberauth/guardian_db) library for JWT tokens persistence.  
+You can use `GuardianRedis` in case you use [Guardian](https://github.com/ueberauth/guardian) library for authentication
+and [Guardian.DB](https://github.com/ueberauth/guardian_db) library for JWT tokens persistence.
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `guardian_redis` to your list of dependencies in `mix.exs`:
@@ -24,12 +24,12 @@ end
 
 ## Configuration
 
-All you need to install Guardian DB as per [Guardian.DB README](https://github.com/ueberauth/guardian_db#readme) 
-and just use `GuardianRedis.Repo` as a `repo` in settings.
+All you need to install Guardian DB as per [Guardian.DB README](https://github.com/ueberauth/guardian_db#readme)
+and just use `GuardianRedis.Adapter` as a `adapter` in settings.
 
 ```elixir
 config :guardian, Guardian.DB,
-       repo: GuardianRedis.Repo # Add this Redis repository module
+       adapter: GuardianRedis.Adapter # Add this Redis adapter module
 ```
 
 Add GuardianRedis.Redix to your supervision tree:
@@ -60,11 +60,11 @@ config :guardian_redis, :redis,
 ```
 
 
-## Implement Guardian.DB repo for a different storage
+## Implement Guardian.DB adapter for a different storage
 
-Initially, Guardian.DB was aimed to store and operate JWT tokens in a PostgreSQL database. 
-Sometimes round trip to Postgres database is expensive so this is why this Redis repo was born.
-In case you want to implement a possibility for Guardian.DB to use different storage, e.g. ETS (or MySQL), 
+Initially, Guardian.DB was aimed to store and operate JWT tokens in a PostgreSQL database.
+Sometimes round trip to Postgres database is expensive so this is why this Redis adapter was born.
+In case you want to implement a possibility for Guardian.DB to use different storage, e.g. ETS (or MySQL),
 you need to implement `Guardian.DB.Adapter` behavior. Thanks to [@aleDsz](https://github.com/aleDsz) it's quite simple:
 https://github.com/ueberauth/guardian_db/blob/master/lib/guardian/db/adapter.ex
 

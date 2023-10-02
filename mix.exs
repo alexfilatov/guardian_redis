@@ -9,7 +9,7 @@ defmodule GuardianRedis.MixProject do
       name: "GuardianRedis",
       app: :guardian_redis,
       version: @version,
-      description: "Redis repo for Guardian DB",
+      description: "Redis adapter for Guardian DB",
       elixir: "~> 1.4 or ~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),

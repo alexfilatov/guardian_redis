@@ -2,7 +2,7 @@ defmodule GuardianRedis.Adapter do
   @moduledoc """
     `GuardianRedis.Adapter` is a module that operates Guardian.DB.Token in Redis.
 
-    The module serves only GuardianDB purpose, do not use it as a Redis Repo for your project.
+    The module serves only GuardianDB purpose, do not use it as a Redis adapter for your project.
 
     Dependant on :jason and :redix.
 
