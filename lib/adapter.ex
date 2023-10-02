@@ -1,41 +1,128 @@
-defmodule Guardian.DB.Adapter do
+defmodule GuardianRedis.Adapter do
   @moduledoc """
-  The Guardian DB Adapter.
+    `GuardianRedis.Adapter` is a module that operates Guardian.DB.Token in Redis.
 
-  This behaviour allows to use any storage system
-  for Guardian Tokens.
+    The module serves only GuardianDB purpose, do not use it as a Redis Repo for your project.
+
+    Dependant on :jason and :redix.
+
+    Stores and deletes JWT token to/from Redis using key combined from JWT.jti and JWT.aud.
+
+    Module stores JWT token in Redis using automatic expiry feature of Redis so we don't need to run token sweeper.
+
+    Anyway, `delete_all` still implemented to allow manual sweeping if needed.
   """
+  @behaviour Guardian.DB.Adapter
 
-  @typep query :: Ecto.Query.t()
-  @typep schema :: Ecto.Schema.t()
-  @typep changeset :: Ecto.Changeset.t()
-  @typep schema_or_changeset :: schema() | changeset()
-  @typep queryable :: query() | schema()
-  @typep opts :: keyword()
-  @typep id :: pos_integer() | binary() | Ecto.UUID.t()
+  alias Guardian.DB.Token
+  alias GuardianRedis.Redix, as: Redis
 
   @doc """
-  Retrieves JWT token
-  Used in `Guardian.DB.Token.find_by_claims/1`
+  Fetches a single result from the query.
+
+  Returns nil if no result was found. Raises if more than one entry.
   """
-  @callback one(queryable()) :: schema() | nil
+  @impl true
+  def one(query, _opts) do
+    key = key(query)
+
+    case Redis.command(["GET", key]) do
+      {:ok, nil} -> nil
+      {:ok, jwt_json} -> Jason.decode!(jwt_json)
+      _ -> nil
+    end
+  end
 
   @doc """
-  Persists JWT token
-  Used in `Guardian.DB.Token.create/2`
+  Insert Token into Redis
+  Token is auto expired in `expired_in` seconds based on JWT `exp` value.
   """
-  @callback insert(schema_or_changeset()) :: {:ok, schema()} | {:error, changeset()}
+  @impl true
+  def insert(struct, _opts) do
+    key = key(struct)
+
+    expires_in = struct.changes.exp - System.system_time(:second)
+    utc_now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    token =
+      struct.changes
+      |> Map.put(:inserted_at, utc_now)
+      |> Map.put(:updated_at, utc_now)
+
+    case Redis.command(["SETEX", key, Integer.to_string(expires_in), Jason.encode!(token)]) do
+      {:ok, "OK"} ->
+        # Adding key to the set `sub` (user_id in JWT) so we can delete all user tokens in one go
+        sub = sub_elem(struct)
+        Redis.command(["SADD", set_name(sub), key])
+        {:ok, struct(Token, token)}
+
+      error ->
+        {:error, error}
+    end
+  end
 
   @doc """
-  Deletes JWT token
-  Used in `Guardian.DB.Token.destroy_token/3`
+  Remove a user token, log out functionality, invalidation of a JWT token.
   """
-  @callback delete(schema_or_changeset(), opts()) :: {:ok, schema()} | {:error, changeset()}
+  @impl true
+  def delete(model, _opts) do
+    key = key(model)
+
+    case Redis.command(["DEL", key]) do
+      {:ok, _num} -> {:ok, struct(Token, model)}
+      _ -> {:error, model}
+    end
+  end
 
   @doc """
-  Purges all JWT tokens
-  Used in `Guardian.DB.Token.purge_expired_tokens/0 and in `Guardian.DB.Token.destroy_by_sub/1`
-  Returns a tuple containing the number of entries and any returned result as second element.
+  Remove all tokens that belong to given `sub`.
   """
-  @callback delete_all(queryable(), opts()) :: {integer(), nil | [term()]}
+  @impl true
+  def delete_by_sub(sub, _opts) do
+    set_name = set_name(sub)
+
+    {:ok, keys} = Redis.command(["SMEMBERS", set_name])
+    {:ok, amount_deleted} = Redis.command(["DEL", set_name] ++ keys)
+
+    # yeah, vise-versa
+    {amount_deleted - 1, nil}
+  end
+
+  @doc """
+  Mock implementation as Redis has built in key expiration.
+  """
+  @impl true
+  def purge_expired_tokens(_timestamp, _opts), do: {0, nil}
+
+  # Generate Redis key from a changeset, %Token{} struct or Ecto.Query
+  defp key(%{changes: %{jti: jti, aud: aud}}), do: combine_key(jti, aud)
+  defp key(%{"jti" => jti, "aud" => aud}), do: combine_key(jti, aud)
+  defp key(query), do: combine_key(jti_elem(query), aud_elem(query))
+  defp sub_elem(%{changes: %{sub: sub}}), do: sub
+  defp sub_elem(%{"sub" => sub}), do: sub
+  defp sub_elem(query), do: query_param(query, :sub)
+  defp jti_elem(query), do: query_param(query, :jti)
+  defp aud_elem(query), do: query_param(query, :aud)
+  defp combine_key(jti, aud), do: "#{jti}:#{aud}"
+  defp set_name(sub), do: "set:#{sub}"
+
+  # Retrieves params from `query.wheres` by atom name (`:jti` and `:aud` in our case), example:
+
+  # ```
+  # [
+  #   %Ecto.Query.BooleanExpr{
+  #     ...
+  #     params: [
+  #       {"2e024736-b4a6-4422-8b0a-4e89c7a7ebf9", {0, :jti}},
+  #       {"my_app", {0, :aud}}
+  #     ],
+  #     ...
+  #   }
+  # ]
+  # ```
+  defp query_param(query, param) do
+    (query.wheres |> List.first()).params
+    |> Enum.find(fn i -> i |> elem(1) |> elem(1) == param end)
+    |> elem(0)
+  end
 end

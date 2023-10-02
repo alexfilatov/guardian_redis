@@ -1,8 +1,6 @@
 use Mix.Config
 
-config :guardian, Guardian.DB, repo: GuardianRedis.Repo
-# store all token types if not set
-# token_types: ["refresh_token"],
+config :guardian, Guardian.DB, adapter: GuardianRedis.Adapter
 
 config :guardian_redis, :redis,
   host: System.get_env("REDIS_HOST", "127.0.0.1"),

@@ -1,4 +1,4 @@
-defmodule GuardianRedis.RepoTest do
+defmodule GuardianRedis.AdapterTest do
   use ExUnit.Case
   alias Guardian.DB.Token
 
@@ -106,25 +106,76 @@ defmodule GuardianRedis.RepoTest do
     assert token == nil
   end
 
-  test "revoke_all deletes all tokens of a sub" do
-    sub = "the_subject"
+  describe "delete_by_sub/2" do
+    test "deletes all tokens of a sub" do
+      sub = "the_subject"
 
-    Token.create(
-      %{"jti" => "token1", "aud" => "token", "exp" => Guardian.timestamp() + 5000, "sub" => sub},
-      "Token 1"
-    )
+      Token.create(
+        %{
+          "jti" => "token1",
+          "aud" => "token",
+          "exp" => Guardian.timestamp() + 5000,
+          "sub" => sub
+        },
+        "Token 1"
+      )
 
-    Token.create(
-      %{"jti" => "token2", "aud" => "token", "exp" => Guardian.timestamp() + 5000, "sub" => sub},
-      "Token 2"
-    )
+      Token.create(
+        %{
+          "jti" => "token2",
+          "aud" => "token",
+          "exp" => Guardian.timestamp() + 5000,
+          "sub" => sub
+        },
+        "Token 2"
+      )
 
-    Token.create(
-      %{"jti" => "token3", "aud" => "token", "exp" => Guardian.timestamp() + 5000, "sub" => sub},
-      "Token 3"
-    )
+      Token.create(
+        %{
+          "jti" => "token3",
+          "aud" => "token",
+          "exp" => Guardian.timestamp() + 5000,
+          "sub" => sub
+        },
+        "Token 3"
+      )
 
-    assert Guardian.DB.revoke_all(sub) == {:ok, 3}
-    assert GuardianRedis.Redix.command(["KEYS", "*"]) == {:ok, []}
+      assert {:ok, 3} = Guardian.DB.revoke_all(sub)
+      assert {:ok, []} = GuardianRedis.Redix.command(["KEYS", "*"])
+    end
+
+    test "doesn't affect tokens from a different sub" do
+      sub = "the_subject"
+
+      Token.create(
+        %{
+          "jti" => "token1",
+          "aud" => "token",
+          "exp" => Guardian.timestamp() + 5000,
+          "sub" => sub
+        },
+        "Token 1"
+      )
+
+      sub_2 = "another_subject"
+
+      Token.create(
+        %{
+          "jti" => "token2",
+          "aud" => "token",
+          "exp" => Guardian.timestamp() + 5000,
+          "sub" => sub_2
+        },
+        "Token 2"
+      )
+
+      assert {:ok, 1} = Guardian.DB.revoke_all(sub)
+      assert {:ok, keys} = GuardianRedis.Redix.command(["KEYS", "*"])
+      assert ["set:#{sub_2}", "token2:token"] == keys
+    end
+  end
+
+  test "purge_expired_tokens/2 can be called" do
+    assert {0, nil} = Guardian.DB.Token.purge_expired_tokens()
   end
 end
