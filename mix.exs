@@ -36,7 +36,7 @@ defmodule GuardianRedis.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:guardian_db, "~> 2.0"},
+      {:guardian_db, "~> 3.0"},
       {:redix, "~> 1.1"},
       {:jason, "~> 1.1"},
 
