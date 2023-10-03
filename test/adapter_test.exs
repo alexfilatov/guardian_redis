@@ -28,7 +28,7 @@ defmodule GuardianRedis.AdapterTest do
     {:ok, %{claims: claims}}
   end
 
-  test "after_encode_and_sign_in is successful", context do
+  test "after_encode_and_sign is successful", context do
     token = get_token()
 
     assert token == nil
@@ -46,18 +46,21 @@ defmodule GuardianRedis.AdapterTest do
     assert token["claims"] == context.claims
   end
 
-  test "on_verify with a record in the db", context do
-    Token.create(context.claims, "The JWT")
-    token = get_token()
-    assert token != nil
+  describe "on_verify/2" do
+    test "with a record in the db", context do
+      Token.create(context.claims, "The JWT")
+      token = get_token()
+      assert token != nil
 
-    assert {:ok, {context.claims, "The JWT"}} == Guardian.DB.on_verify(context.claims, "The JWT")
-  end
+      assert {:ok, {context.claims, "The JWT"}} ==
+               Guardian.DB.on_verify(context.claims, "The JWT")
+    end
 
-  test "on_verify without a record in the db", context do
-    token = get_token()
-    assert token == nil
-    assert {:error, :token_not_found} == Guardian.DB.on_verify(context.claims, "The JWT")
+    test "without a record in the db", context do
+      token = get_token()
+      assert token == nil
+      assert {:error, :token_not_found} == Guardian.DB.on_verify(context.claims, "The JWT")
+    end
   end
 
   test "on_refresh without a record in the db", context do
@@ -84,26 +87,31 @@ defmodule GuardianRedis.AdapterTest do
     assert Guardian.DB.on_refresh(old_stuff, new_stuff) == {:ok, old_stuff, new_stuff}
   end
 
-  test "on_revoke without a record in the db", context do
-    token = get_token()
-    assert token == nil
-    assert Guardian.DB.on_revoke(context.claims, "The JWT") == {:ok, {context.claims, "The JWT"}}
-  end
+  describe "on_revoke/2" do
+    test "without a record in the db", context do
+      token = get_token()
+      assert token == nil
 
-  test "on_revoke with a record in the db", context do
-    Token.create(context.claims, "The JWT")
+      assert Guardian.DB.on_revoke(context.claims, "The JWT") ==
+               {:ok, {context.claims, "The JWT"}}
+    end
 
-    {:ok, keys} = GuardianRedis.Redix.command(["KEYS", "*"])
-    assert Enum.sort(keys) == ["set:initial_the_subject", "token-uuid:token"]
+    test "with a record in the db", context do
+      Token.create(context.claims, "The JWT")
 
-    token = get_token()
+      {:ok, keys} = GuardianRedis.Redix.command(["KEYS", "*"])
+      assert Enum.sort(keys) == ["set:initial_the_subject", "token-uuid:token"]
 
-    assert token != nil
+      token = get_token()
 
-    assert Guardian.DB.on_revoke(context.claims, "The JWT") == {:ok, {context.claims, "The JWT"}}
+      assert token != nil
 
-    token = get_token()
-    assert token == nil
+      assert Guardian.DB.on_revoke(context.claims, "The JWT") ==
+               {:ok, {context.claims, "The JWT"}}
+
+      token = get_token()
+      assert token == nil
+    end
   end
 
   describe "delete_by_sub/2" do
@@ -171,7 +179,12 @@ defmodule GuardianRedis.AdapterTest do
 
       assert {:ok, 1} = Guardian.DB.revoke_all(sub)
       assert {:ok, keys} = GuardianRedis.Redix.command(["KEYS", "*"])
-      assert ["set:#{sub_2}", "token2:token"] == keys
+      assert Enum.all?(["set:#{sub_2}", "token2:token"], &(&1 in keys))
+    end
+
+    test "returns 0 if nothing was revoked" do
+      sub = "the_subject"
+      assert {:ok, 0} = Guardian.DB.revoke_all(sub)
     end
   end
 

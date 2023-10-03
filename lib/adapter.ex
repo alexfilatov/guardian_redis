@@ -83,8 +83,9 @@ defmodule GuardianRedis.Adapter do
     {:ok, keys} = Redis.command(["SMEMBERS", set_name])
     {:ok, amount_deleted} = Redis.command(["DEL", set_name] ++ keys)
 
-    # yeah, vise-versa
-    {amount_deleted - 1, nil}
+    if amount_deleted > 0,
+      do: {amount_deleted - 1, nil},
+      else: {0, nil}
   end
 
   @doc """
