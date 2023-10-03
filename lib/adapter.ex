@@ -1,16 +1,14 @@
 defmodule GuardianRedis.Adapter do
   @moduledoc """
-    `GuardianRedis.Adapter` is a module that operates Guardian.DB.Token in Redis.
+  An adapter for `Guardian.DB` that uses Redis.
 
-    The module serves only GuardianDB purpose, do not use it as a Redis adapter for your project.
+  Serves only `Guardian.DB` purpose, do not use it as a Redis adapter for your project.
 
-    Dependant on :jason and :redix.
+  Dependant on `Jason` and `Redix`.
 
-    Stores and deletes JWT token to/from Redis using key combined from JWT.jti and JWT.aud.
+  Stores and deletes JWT token to/from Redis using key combined from JWT.jti and JWT.aud.
 
-    Module stores JWT token in Redis using automatic expiry feature of Redis so we don't need to run token sweeper.
-
-    Anyway, `delete_all` still implemented to allow manual sweeping if needed.
+  Module stores JWT token in Redis using automatic expiry feature of Redis so we don't need to run token sweeper.
   """
   @behaviour Guardian.DB.Adapter
 
@@ -34,7 +32,8 @@ defmodule GuardianRedis.Adapter do
   end
 
   @doc """
-  Insert Token into Redis
+  Insert Token into Redis.
+
   Token is auto expired in `expired_in` seconds based on JWT `exp` value.
   """
   @impl true
@@ -89,7 +88,7 @@ defmodule GuardianRedis.Adapter do
   end
 
   @doc """
-  Mock implementation as Redis has built in key expiration.
+  Mock implementation as Redis has built in key expiration that is in use.
   """
   @impl true
   def purge_expired_tokens(_timestamp, _opts), do: {0, nil}
@@ -107,7 +106,6 @@ defmodule GuardianRedis.Adapter do
   defp set_name(sub), do: "set:#{sub}"
 
   # Retrieves params from `query.wheres` by atom name (`:jti` and `:aud` in our case), example:
-
   # ```
   # [
   #   %Ecto.Query.BooleanExpr{
