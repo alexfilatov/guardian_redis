@@ -59,6 +59,8 @@ config :guardian_redis, :redis,
   pool_size: 10
 ```
 
+More options are available as described in `GuardianRedis.Redix`.
+
 
 ## Implement Guardian.DB adapter for a different storage
 
