@@ -16,7 +16,7 @@ by adding `guardian_redis` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:guardian_redis, "~> 0.1.0"}
+    {:guardian_redis, "~> 0.2.0"}
   ]
 end
 ```
