@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: elixir:1.11-alpine
+      image: elixir:1.15-alpine
 
     services:
       redis:
