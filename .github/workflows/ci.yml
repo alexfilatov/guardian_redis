@@ -53,9 +53,6 @@ jobs:
           REDIS_HOST: redis
           REDIS_PORT: 6379
           REDIS_POOL_SIZE: 1
-
-      - name: Run Coveralls
-        run: mix coveralls
   
   
 
