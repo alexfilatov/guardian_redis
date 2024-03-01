@@ -41,11 +41,11 @@ defmodule GuardianRedis.MixProject do
       {:jason, "~> 1.1"},
 
       # Tools
-      {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
-      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
-      {:excoveralls, ">= 0.0.0", only: [:test], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
-      {:inch_ex, ">= 0.0.0", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: [:test], runtime: false},
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
       {:plug, "~> 1.10", only: [:dev, :test], runtime: false}
     ]
   end
