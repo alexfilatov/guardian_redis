@@ -55,7 +55,7 @@ jobs:
           REDIS_POOL_SIZE: 1
 
       - name: Run Coveralls
-        run: mix coveralls.github
+        run: mix coveralls
   
   
 
