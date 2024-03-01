@@ -56,7 +56,7 @@ defmodule GuardianRedis.Redix do
       iex> GuardianRedis.Redix.command(["GET", "key"])
       {:ok, "value"}
   """
-  @spec command(command_params :: List.t()) ::
+  @spec command(command_params :: list(any())) ::
           {:ok, Redix.Protocol.redis_value()}
           | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def command(command_params) do
